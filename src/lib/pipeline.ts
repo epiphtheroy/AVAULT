@@ -43,7 +43,8 @@ export function cleanDraft(draft: {
   const summary_line = strip(draft.summary_line).replace(/^\*+/, "").replace(/\*+$/, "").trim();
 
   let body = strip(draft.body_md);
-  const norm = (s: string) => s.replace(/[#*_>\s]+/g, " ").trim().toLowerCase();
+  // Punctuation-insensitive normalization so truncated/repunctuated variants still match.
+  const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   const refs = [norm(headline), norm(deck), norm(summary_line)].filter((s) => s.length >= 25);
 
   // Drop any of the first 4 blocks that duplicate (even truncated/extended variants of)
