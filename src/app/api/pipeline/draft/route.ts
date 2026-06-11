@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { callClaude, extractJson, columnModel } from "@/lib/anthropic";
 import { COLUMN_PRODUCTION_PROMPT, antiRepetitionDigest, columnUserPrompt } from "@/lib/prompts";
-import { getRecentDigest, logEvent } from "@/lib/pipeline";
+import { getRecentDigest, logEvent, cleanDraft } from "@/lib/pipeline";
 import type { SourceRef } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -84,12 +84,13 @@ export async function POST(req: Request) {
     });
 
     const draft = extractJson<DraftPayload>(result.text);
+    const cleaned = cleanDraft(draft);
 
     const update = {
-      headline: draft.headline,
-      deck: draft.deck,
-      summary_line: draft.summary_line,
-      body_md: draft.body_md,
+      headline: cleaned.headline,
+      deck: cleaned.deck,
+      summary_line: cleaned.summary_line,
+      body_md: cleaned.body_md,
       sources_json: draft.sources ?? [],
       theorists_json: draft.theorists ?? [],
       intervention_type: draft.intervention_type ?? null,
@@ -101,10 +102,10 @@ export async function POST(req: Request) {
     await db.from("articles").update(update).eq("id", article.id);
     await db.from("article_versions").insert({
       article_id: article.id,
-      headline: draft.headline,
-      deck: draft.deck,
-      summary_line: draft.summary_line,
-      body_md: draft.body_md,
+      headline: cleaned.headline,
+      deck: cleaned.deck,
+      summary_line: cleaned.summary_line,
+      body_md: cleaned.body_md,
       note: articleId ? `regeneration ${update.regen_count}` : "initial draft",
     });
 

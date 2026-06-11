@@ -27,6 +27,34 @@ export async function getRecentDigest(): Promise<DigestEntry[]> {
   return (data as DigestEntry[]) ?? [];
 }
 
+/** Remove web-search citation markers and leading duplicates of headline/deck/summary
+ *  that models sometimes embed in body_md. */
+export function cleanDraft(draft: {
+  headline: string; deck: string; summary_line: string; body_md: string;
+}): { headline: string; deck: string; summary_line: string; body_md: string } {
+  const strip = (s: string) =>
+    (s ?? "")
+      .replace(/<\/?cite[^>]*>/g, "")
+      .replace(/<\/?antml[^>]*>/g, "")
+      .trim();
+
+  const headline = strip(draft.headline).replace(/^#+\s*/, "");
+  const deck = strip(draft.deck);
+  const summary_line = strip(draft.summary_line).replace(/^\*+/, "").replace(/\*+$/, "").trim();
+
+  let body = strip(draft.body_md);
+  const norm = (s: string) => s.replace(/[#*_>\s]+/g, " ").trim().toLowerCase();
+  const dupes = new Set([norm(headline), norm(deck), norm(summary_line)]);
+
+  // Drop leading blocks that duplicate the headline, deck, or summary line.
+  const blocks = body.split(/\n{2,}/);
+  let i = 0;
+  while (i < blocks.length && i < 4 && dupes.has(norm(blocks[i]))) i++;
+  body = blocks.slice(i).join("\n\n").trim();
+
+  return { headline, deck, summary_line, body_md: body };
+}
+
 export function slugify(headline: string): string {
   return headline
     .toLowerCase()
