@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#e3120b"/>
+  <!-- A: upward triangle, V: mirrored downward triangle — the A-V monogram -->
+  <path d="M18 46 L30 18 L34 18 L22 46 Z" fill="#ffffff"/>
+  <path d="M30 18 L42 46 L46 46 L34 18 Z" fill="#ffffff" opacity="0.55"/>
+</svg>

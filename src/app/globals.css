@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* AVAULT design tokens — Economist mobile concept:
+   monochrome editorial base, signal red accent, serif headlines, hairline rules. */
+@theme {
+  --color-ink: #0d0d0d;
+  --color-ink-soft: #3d3d3d;
+  --color-ink-faint: #757575;
+  --color-paper: #ffffff;
+  --color-paper-warm: #f7f5f1;
+  --color-rule: #d9d6d0;
+  --color-rule-dark: #0d0d0d;
+  --color-accent: #e3120b;
+  --color-accent-dark: #b80d07;
+  --font-serif: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter Variable", -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern";
+  text-rendering: optimizeLegibility;
+}
+
+/* Article body typography (rendered markdown) */
+.prose-avault {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--color-ink);
+}
+.prose-avault p {
+  margin: 0 0 1.1em;
+}
+.prose-avault h2 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  margin: 1.8em 0 0.6em;
+  padding-top: 0.9em;
+  border-top: 1px solid var(--color-rule);
+}
+.prose-avault h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 1.4em 0 0.5em;
+}
+.prose-avault strong {
+  font-weight: 700;
+}
+.prose-avault a {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+.prose-avault a:hover {
+  border-bottom-color: var(--color-accent);
+}
+.prose-avault ol, .prose-avault ul {
+  margin: 0 0 1.1em 1.4em;
+}
+.prose-avault ol { list-style: decimal; }
+.prose-avault ul { list-style: disc; }
+.prose-avault li { margin-bottom: 0.4em; }
+.prose-avault blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1em;
+  color: var(--color-ink-soft);
+  margin: 0 0 1.1em;
+}
+
+/* Kicker: small caps red label */
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Headline serif */
+.hed {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.18;
+}
+
+/* Hairline list row (Economist app style) */
+.row-rule + .row-rule {
+  border-top: 1px solid var(--color-rule);
+}
+
+/* Red top bar on cards */
+.bar-top {
+  border-top: 3px solid var(--color-accent);
+}
