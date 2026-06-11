@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Wordmark } from "@/components/site/Wordmark";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +21,7 @@ export default function LoginPage() {
       setBusy(false);
       return;
     }
-    router.push("/admin");
-    router.refresh();
+    window.location.assign("/admin"); // full navigation so middleware sees the fresh session cookie
   }
 
   return (

@@ -36,29 +36,33 @@ export async function GET(req: Request) {
     if (!seen.has(cid)) seen.set(cid, item);
   }
 
-  let inserted = 0;
-  for (const [cid, item] of seen) {
-    // Skip if this cluster already exists in the last 48h.
-    const { data: existing } = await db
-      .from("stories").select("id").eq("cluster_id", cid)
-      .gte("detected_at", new Date(Date.now() - 48 * 3600_000).toISOString())
-      .limit(1);
-    if (existing && existing.length) continue;
+  // One query: clusters already seen in the last 48h (instead of per-item round trips).
+  const { data: recentClusters } = await db
+    .from("stories")
+    .select("cluster_id")
+    .gte("detected_at", new Date(Date.now() - 48 * 3600_000).toISOString());
+  const known = new Set((recentClusters ?? []).map((r) => r.cluster_id));
 
-    const { error } = await db.from("stories").upsert(
-      {
-        cluster_id: cid,
-        outlet: item.outlet,
-        url: item.link,
-        headline: item.title,
-        byline: item.byline,
-        published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
-        summary: item.description?.slice(0, 1000) ?? null,
-        status: "DETECTED",
-      },
-      { onConflict: "url", ignoreDuplicates: true }
-    );
-    if (!error) inserted++;
+  const rows = [...seen.entries()]
+    .filter(([cid]) => !known.has(cid))
+    .map(([cid, item]) => ({
+      cluster_id: cid,
+      outlet: item.outlet,
+      url: item.link,
+      headline: item.title,
+      byline: item.byline,
+      published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
+      summary: item.description?.slice(0, 1000) ?? null,
+      status: "DETECTED" as const,
+    }));
+
+  let inserted = 0;
+  if (rows.length) {
+    const { error, count } = await db
+      .from("stories")
+      .upsert(rows, { onConflict: "url", ignoreDuplicates: true, count: "exact" });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    inserted = count ?? rows.length;
   }
 
   await logEvent("system", null, null, null, "system", { job: "detect", feeds: feeds.length, fetched: items.length, inserted });
