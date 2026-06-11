@@ -25,7 +25,9 @@ Next.js (App Router) · Supabase (Postgres + Auth) · Vercel (hosting + cron) ·
 
 ## Deploy
 
-Push to GitHub → import in Vercel → set env vars (all from `.env.example`) → deploy. `vercel.json` registers both crons; set `CRON_SECRET` so Vercel authenticates them. Note: the detect cron's multi-hour schedule requires a paid Vercel plan; on Hobby, use the Story Desk "Detect now" button.
+Push to GitHub → import in Vercel → set env vars (all from `.env.example`) → deploy. `vercel.json` registers both crons; set `CRON_SECRET` so Vercel authenticates them.
+
+Cron schedules (Hobby-plan compatible, once daily each): detect at 20:00 UTC (05:00 KST, before the Seoul morning desk session); open-vault at 10:00 UTC (6:00 a.m. EDT / 5:00 a.m. EST). On Pro, restore the spec's every-2h detect (`0 1,3,5,7,9,11,13,19,21,23 * * *`) and hourly open-vault (`0 * * * *`). Intraday detection is always available via the Story Desk "Detect now" button.
 
 ## Daily operation
 
