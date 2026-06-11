@@ -79,8 +79,9 @@ export async function POST(req: Request) {
       system: COLUMN_PRODUCTION_PROMPT,
       prompt,
       model,
-      maxTokens: 16000,
+      maxTokens: 24000,
       webSearch: true,
+      thinkingBudget: 10000, // extended thinking ON for column writing (editor decision)
     });
 
     const draft = extractJson<DraftPayload>(result.text);

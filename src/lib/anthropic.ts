@@ -18,6 +18,8 @@ interface CallOpts {
   maxTokens?: number;
   webSearch?: boolean;
   temperature?: number;
+  /** Extended thinking budget in tokens (enables thinking when set). */
+  thinkingBudget?: number;
 }
 
 export function columnModel(): string {
@@ -38,7 +40,12 @@ export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
     messages: [{ role: "user", content: opts.prompt }],
   };
   if (opts.system) body.system = opts.system;
-  if (typeof opts.temperature === "number") body.temperature = opts.temperature;
+  if (opts.thinkingBudget) {
+    // Extended thinking: deeper reasoning before writing. Incompatible with temperature.
+    body.thinking = { type: "enabled", budget_tokens: opts.thinkingBudget };
+  } else if (typeof opts.temperature === "number") {
+    body.temperature = opts.temperature;
+  }
   if (opts.webSearch) {
     body.tools = [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }];
   }

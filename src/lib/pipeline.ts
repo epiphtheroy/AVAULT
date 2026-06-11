@@ -44,13 +44,17 @@ export function cleanDraft(draft: {
 
   let body = strip(draft.body_md);
   const norm = (s: string) => s.replace(/[#*_>\s]+/g, " ").trim().toLowerCase();
-  const dupes = new Set([norm(headline), norm(deck), norm(summary_line)]);
+  const refs = [norm(headline), norm(deck), norm(summary_line)].filter((s) => s.length >= 25);
 
-  // Drop leading blocks that duplicate the headline, deck, or summary line.
+  // Drop any of the first 4 blocks that duplicate (even truncated/extended variants of)
+  // the headline, deck, or summary line.
+  const isDupe = (block: string) => {
+    const b = norm(block);
+    if (b.length < 25) return refs.includes(b) || b === norm(headline);
+    return refs.some((d) => b === d || d.includes(b) || b.includes(d));
+  };
   const blocks = body.split(/\n{2,}/);
-  let i = 0;
-  while (i < blocks.length && i < 4 && dupes.has(norm(blocks[i]))) i++;
-  body = blocks.slice(i).join("\n\n").trim();
+  body = blocks.filter((blk, idx) => !(idx < 4 && isDupe(blk))).join("\n\n").trim();
 
   return { headline, deck, summary_line, body_md: body };
 }
