@@ -18,8 +18,8 @@ interface CallOpts {
   maxTokens?: number;
   webSearch?: boolean;
   temperature?: number;
-  /** Extended thinking budget in tokens (enables thinking when set). */
-  thinkingBudget?: number;
+  /** Adaptive thinking effort (enables extended thinking when set). */
+  effort?: "low" | "medium" | "high";
 }
 
 export function columnModel(): string {
@@ -40,9 +40,10 @@ export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
     messages: [{ role: "user", content: opts.prompt }],
   };
   if (opts.system) body.system = opts.system;
-  if (opts.thinkingBudget) {
-    // Extended thinking: deeper reasoning before writing. Incompatible with temperature.
-    body.thinking = { type: "enabled", budget_tokens: opts.thinkingBudget };
+  if (opts.effort) {
+    // Adaptive extended thinking (Fable 5 API). Incompatible with temperature.
+    body.thinking = { type: "adaptive" };
+    body.output_config = { effort: opts.effort };
   } else if (typeof opts.temperature === "number") {
     body.temperature = opts.temperature;
   }

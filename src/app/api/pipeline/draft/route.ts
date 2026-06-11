@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       model,
       maxTokens: 24000,
       webSearch: true,
-      thinkingBudget: 10000, // extended thinking ON for column writing (editor decision)
+      effort: "high", // adaptive extended thinking ON for column writing (editor decision)
     });
 
     const draft = extractJson<DraftPayload>(result.text);
