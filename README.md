@@ -2,7 +2,7 @@
 
 The personal studio of Wonwoo Yoon: three political-ethical verdicts on the day's biggest news, daily. One named author, AI-assisted and disclosed, human-approved at every gate.
 
-Full specification: `../avault-master-spec-v1.md` (Master Spec v1.0).
+Full specification: `docs/avault-master-spec-v1.md` (Master Spec v1.0).
 
 ## Stack
 
