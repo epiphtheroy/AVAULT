@@ -81,6 +81,20 @@ export async function POST(req: Request) {
     };
   });
 
+  // Re-running identify replaces the list (no duplicate stacking); contacts with a
+  // sent/approved email are preserved so outreach history is never lost.
+  const { data: existing } = await db.from("contacts").select("id").eq("article_id", articleId);
+  const existingIds = (existing ?? []).map((c) => c.id);
+  if (existingIds.length) {
+    const { data: protectedEmails } = await db
+      .from("outreach_emails").select("contact_id")
+      .in("contact_id", existingIds)
+      .in("status", ["SENT", "APPROVED"]);
+    const keep = new Set((protectedEmails ?? []).map((e) => e.contact_id));
+    const removable = existingIds.filter((id) => !keep.has(id));
+    if (removable.length) await db.from("contacts").delete().in("id", removable);
+  }
+
   const { error } = await db.from("contacts").insert(rows);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
