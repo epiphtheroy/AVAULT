@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     prompt: selectionPrompt(candidates, recentTopics),
     model,
     maxTokens: 12000,
-    thinkingBudget: 6000,
+    effort: "medium",
   });
 
   const ranked = extractJson<{ id: string; score: number; rationale: string }[]>(result.text);

@@ -18,10 +18,8 @@ interface CallOpts {
   maxTokens?: number;
   webSearch?: boolean;
   temperature?: number;
-  /** Adaptive thinking effort — Fable-family models only. */
+  /** Adaptive extended-thinking effort (current Anthropic API, all recent models). */
   effort?: "low" | "medium" | "high";
-  /** Extended-thinking budget in tokens — Opus/Sonnet-family models. */
-  thinkingBudget?: number;
 }
 
 export function columnModel(): string {
@@ -51,12 +49,9 @@ export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
   };
   if (opts.system) body.system = opts.system;
   if (opts.effort) {
-    // Adaptive extended thinking (Fable 5 API). Incompatible with temperature.
+    // Adaptive extended thinking. Incompatible with temperature.
     body.thinking = { type: "adaptive" };
     body.output_config = { effort: opts.effort };
-  } else if (opts.thinkingBudget) {
-    // Extended thinking for Opus/Sonnet-family models.
-    body.thinking = { type: "enabled", budget_tokens: opts.thinkingBudget };
   } else if (typeof opts.temperature === "number") {
     body.temperature = opts.temperature;
   }
