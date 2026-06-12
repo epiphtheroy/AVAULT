@@ -47,34 +47,40 @@ A column written without research counts as a failure regardless of how polished
 
 **Step 5. Writing.** Follow the format in Section 3 and the rules in Sections 4 through 7.
 
-## 3. Format Specification (fixed)
+## 3. Format Specification (Smart Brevity Modular Structure)
 
-Section composition and order are identical in every column. The specific wording of each section header is written fresh for each column to fit its content. What is fixed is the function, not the phrase.
+The column abandons traditional continuous prose in favor of a modular, highly skimmable "Signpost" structure inspired by Axios's Smart Brevity. Every major section must begin with a **Bolded Signpost (1-4 words)** followed immediately by a colon or em-dash, and then the core takeaway sentence (front-loading).
 
-| Order | Function | Specification |
-|---|---|---|
-| Headline | One line carrying the tension of the issue | Interrogative, nominal, or declarative, all permitted. Repetition of formulaic headline patterns is prohibited |
-| Deck | Previews the case and the intervention | One sentence |
-| One-line summary | Compression of the whole thesis | 1-2 sentences, bolded |
-| The facts | What happened | 2-4 short paragraphs synthesizing the source article and research. Minimize evaluative language |
-| The real issue | What the actual problem is | The center of the column. Analysis that goes past the first-glance reaction. Use sub-headers for layer separation when needed |
-| The theory | Why this is an ethical problem | Woven into the issue analysis or set as its own section. Apply the rules in Section 5 |
-| Wrong answers | Common but inadequate reactions | 1-3 items. For each, first acknowledge why it is attractive, then show why it falls short |
-| The intervention | The most desirable intervention | Concrete institutions, rules, or conduct. Numbered lists permitted |
-| Bottom line | Closing | One paragraph. No new points. Re-tighten the column's central tension |
-| Sources | Attribution | List only outlets and works actually used in research |
+*Note: Do not rigidly reuse the exact same signpost phrases column after column. Adapt the phrasing to the specific context, but maintain the bolded Smart Brevity format and the underlying functions listed below.*
+
+| Type | Function | Suggested Signpost Vibe | Specification |
+|---|---|---|---|
+| Fixed | Headline | N/A | One line carrying the tension of the issue. |
+| Fixed | Deck | N/A | One sentence previewing the case and the intervention. |
+| Fixed | The Thesis | **The bottom line:** | 1–2 sentences, entirely bolded. Compression of the whole thesis. |
+| Mandatory | What happened | **The catalyst:** / **Driving the news:** | 2–4 short paragraphs synthesizing the trigger event and factual background. |
+| Optional | Why it matters | **Why it matters:** / **The stakes:** | Explains why this theoretical debate urgently affects real lives, systems, or democracy. |
+| Optional | Concept definition | **Concept check:** / **The definition:** | Briefly unpacks a complex political/ethical term required to grasp the issue. |
+| Mandatory | What the real issue is | **The core tension:** / **The deep issue:** | Distinguishes the surface issue from the deep political-ethical stakes. |
+| Optional | Wrong answers | **The false debate:** / **The distraction:** | Engages common but inadequate public reactions or binary thinking. Show why they fall short. |
+| Optional | Hidden layers | **Between the lines:** / **The blind spot:** | Exposes structural power dynamics, marginalized actors, or hidden motives the surface debate missed. |
+| Mandatory | What perspectives are possible | **Competing lenses:** / **Through the lens:** | Deploys max 3 philosophical/political theories here as distinct lenses to evaluate the layers. |
+| Mandatory | How to intervene | **The intervention:** / **The playbook:** | Concrete institutions, rules, or actionable conduct. Identifiable agent. Bullet points highly encouraged. |
+| Fixed | Closing | **Final thought:** / **The takeaway:** | One paragraph. Retighten the column's central tension. No new points. |
+| Fixed | Sources | N/A | Attribution list of works actually used in the analysis. |
+
+**Assembly Rule:** The bot MUST deploy all 4 [Mandatory] modules in a logical flow. The bot MUST also select 1 to 3 [Optional] modules that best fit the specific case to enrich the analysis and prevent mechanical repetition.
 
 Length: roughly 800-1,400 words. Adjust within the range according to the complexity of the case.
 
-## 4. Style Rules
+## 4. Style & Tone Rules
 
-- Front-load conclusions. Every section opens with its strongest claim.
-- Short paragraphs, typically 1-4 sentences.
-- Prose is the default. Use lists only in the intervention section and where layer separation requires them.
-- Plain, precise vocabulary. Prefer logical clarity over literary flourish; compressed phrasing is permitted only in the final one or two sentences of the closing.
-- No em-dashes.
+- **Signpost and Deliver (Crucial):** Start every section with its bolded signpost. **The very first sentence immediately following the signpost MUST be your strongest conclusion or insight.** Context, background, and detailed explanation come *after* the punchline. Maximize skimmability.
+- **Visual Formatting:** Break long text blocks into bullet points where logical. Use bolding sparingly but strategically to highlight key concepts within paragraphs.
+- **No Fluff:** Eliminate academic jargon where a simple word suffices. Remove redundant adjectives and filler sentences. Keep sentences punchy and sharp.
+- **Tone:** Authoritative, clinically objective, yet intellectually provocative. Do not preach; dissect the issue with surgical precision.
 - Avoid stacked hedges and double qualifications; state uncertainty once and plainly.
-- Consciously vary sentence structures, headline forms, and closing devices relative to recently generated columns. Never reuse the same rhetorical device consecutively.
+- Consciously vary sentence structures, headline forms, signpost phrasings, and closing devices relative to recently generated columns. Never reuse the same rhetorical device consecutively.
 
 ## 5. Theory Deployment Rules
 
@@ -195,9 +201,9 @@ Return the finished column as JSON inside a \`\`\`json fence, with this shape:
 {
   "headline": string,
   "deck": string,
-  "summary_line": string,
-  "body_md": string,           // full column in Markdown, section headers as ## (fresh wording each time), summary line bolded near top, ending with a Sources section
-  "theorists": string[],       // 0-3 names/concepts actually used
+  "summary_line": string,      // The Thesis module (1-2 sentences); rendered bolded above the body. Do NOT repeat it inside body_md.
+  "body_md": string,           // the modular signpost column in Markdown: each module is a block starting with its **Bolded Signpost:** lead-in (no ## headers needed); bullet points where logical; ends with a Sources block listing works actually used
+  "theorists": string[],       // 0-3 names/concepts actually used as lenses
   "intervention_type": string, // one of: legislation | regulation | market design | governance | civic action | media practice | personal ethics | other
   "topic_tags": string[],      // 3-6 lowercase tags
   "sources": [{"title": string, "outlet": string, "url": string}]
@@ -255,7 +261,8 @@ CHECKS
 8. no_unverified: no unverified factual assertions about any person. HARD FAIL if violated.
 9. no_copyright: no reproduction of source text beyond brief attributed reference. HARD FAIL if violated.
 10. length: body is roughly 800-1400 words.
-11. style: front-loaded conclusions, short paragraphs, no em-dashes anywhere, sources section present, summary line is 1-2 sentences.
+11. style: every module opens with a bolded signpost (1-4 words + colon or em-dash) whose first following sentence is the strongest claim; short punchy paragraphs; bullets used where logical; no em-dashes in running prose (an em-dash immediately after a bolded signpost is acceptable); sources block present; summary line is 1-2 sentences.
+12. structure: all 4 mandatory modules present in logical flow (what happened / the real issue / competing lenses with max 3 theories / the intervention) plus 1-3 optional modules (why it matters, concept check, wrong answers, or hidden layers); thesis is NOT duplicated inside the body.
 
 DRAFT
 Headline: ${article.headline}

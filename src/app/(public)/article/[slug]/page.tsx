@@ -157,8 +157,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 }
 
 function stripSourcesSection(md: string): string {
-  // Sources render from structured data; avoid duplicating a trailing Sources section.
-  return md.split(/\n#{1,3}\s*Sources\s*\n/i)[0];
+  // Sources render from structured data; avoid duplicating a trailing Sources block
+  // (either a "## Sources" header or a "**Sources:**" signpost).
+  return md.split(/\n(?:#{1,3}\s*|\*\*)Sources\b/i)[0];
 }
 
 function ShareLinks({ url, headline }: { url: string; headline: string }) {

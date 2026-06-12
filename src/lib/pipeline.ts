@@ -83,8 +83,8 @@ export function firstLine(bodyMd: string): string {
 }
 
 export function lastLine(bodyMd: string): string {
-  // Last non-empty paragraph before a Sources section, if any.
-  const withoutSources = bodyMd.split(/\n#{1,3}\s*Sources/i)[0];
+  // Last non-empty paragraph before a Sources block ("## Sources" or "**Sources:**").
+  const withoutSources = bodyMd.split(/\n(?:#{1,3}\s*|\*\*)Sources\b/i)[0];
   const paras = withoutSources
     .split("\n")
     .map((l) => l.trim())
