@@ -38,11 +38,26 @@ export function ArticleCard({ article, kicker }: { article: Article; kicker?: st
       {article.youtube_json?.url && (
         <Link
           href={`/article/${article.url_slug}#watch`}
-          className="mt-7 shrink-0 transition-transform hover:scale-110"
+          className="relative mt-7 block shrink-0"
           title="Watch the related video"
           aria-label="Watch the related video"
         >
-          <YouTubeBadge />
+          {article.youtube_json.thumbnail ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={article.youtube_json.thumbnail}
+                alt=""
+                loading="lazy"
+                className="h-14 w-24 border border-rule object-cover transition-opacity hover:opacity-85 sm:h-[4.5rem] sm:w-32"
+              />
+              <span className="absolute bottom-1 right-1 drop-shadow">
+                <YouTubeBadge className="h-3.5 w-5" />
+              </span>
+            </>
+          ) : (
+            <YouTubeBadge />
+          )}
         </Link>
       )}
     </article>
