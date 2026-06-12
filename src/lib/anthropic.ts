@@ -18,8 +18,10 @@ interface CallOpts {
   maxTokens?: number;
   webSearch?: boolean;
   temperature?: number;
-  /** Adaptive thinking effort (enables extended thinking when set). */
+  /** Adaptive thinking effort — Fable-family models only. */
   effort?: "low" | "medium" | "high";
+  /** Extended-thinking budget in tokens — Opus/Sonnet-family models. */
+  thinkingBudget?: number;
 }
 
 export function columnModel(): string {
@@ -27,6 +29,14 @@ export function columnModel(): string {
 }
 export function utilityModel(): string {
   return process.env.ANTHROPIC_UTILITY_MODEL || columnModel();
+}
+/** Story selection: judgment over ~60 candidates; Opus + thinking (editor decision 2026-06-12). */
+export function selectionModel(): string {
+  return process.env.ANTHROPIC_SELECTION_MODEL || "claude-opus-4-8";
+}
+/** EN→KO review translations: cheapest capable model. */
+export function translationModel(): string {
+  return process.env.ANTHROPIC_TRANSLATION_MODEL || "claude-haiku-4-5-20251001";
 }
 
 export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
@@ -44,6 +54,9 @@ export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
     // Adaptive extended thinking (Fable 5 API). Incompatible with temperature.
     body.thinking = { type: "adaptive" };
     body.output_config = { effort: opts.effort };
+  } else if (opts.thinkingBudget) {
+    // Extended thinking for Opus/Sonnet-family models.
+    body.thinking = { type: "enabled", budget_tokens: opts.thinkingBudget };
   } else if (typeof opts.temperature === "number") {
     body.temperature = opts.temperature;
   }

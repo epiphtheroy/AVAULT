@@ -37,6 +37,8 @@ export async function POST(req: Request) {
       const allowed = ["headline", "deck", "summary_line", "body_md", "topic_tags", "intervention_type", "slot_date"] as const;
       const update: Record<string, unknown> = {};
       for (const k of allowed) if (k in fields) update[k] = fields[k];
+      // An edit restarts the 30-minute auto-publish window.
+      if (a.status === "IN_REVIEW" && a.review_requested_at) update.review_requested_at = new Date().toISOString();
       await db.from("articles").update(update).eq("id", id);
       await db.from("article_versions").insert({
         article_id: id,

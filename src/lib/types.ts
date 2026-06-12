@@ -23,6 +23,8 @@ export interface Story {
   selection_rationale: string | null;
   slot_date: string | null;
   detected_at: string;
+  ko_review_md: string | null;
+  shortlisted_at: string | null;
 }
 
 export interface SourceRef {
@@ -54,6 +56,8 @@ export interface Article {
   published_at: string | null;
   is_reopening: boolean;
   flagged_for_reopening: boolean;
+  ko_review_md: string | null;
+  review_requested_at: string | null;
   created_at: string;
   updated_at: string;
 }

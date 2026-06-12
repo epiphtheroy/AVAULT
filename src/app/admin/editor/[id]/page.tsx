@@ -22,12 +22,13 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
   const { data: article } = await db.from("articles").select("*").eq("id", id).single();
   if (!article) notFound();
 
-  const [storyRes, versionsRes, digestRes] = await Promise.all([
+  const [storyRes, versionsRes, digestRes, settingRes] = await Promise.all([
     article.story_id
       ? db.from("stories").select("*").eq("id", article.story_id).single()
       : Promise.resolve({ data: null }),
     db.from("article_versions").select("id, headline, deck, summary_line, body_md, note, created_at").eq("article_id", id).order("created_at", { ascending: false }),
     db.from("recent_digest").select("*"),
+    db.from("app_settings").select("value").eq("key", "auto_publish_minutes").maybeSingle(),
   ]);
 
   return (
@@ -37,6 +38,7 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
       versions={(versionsRes.data as Version[]) ?? []}
       digest={(digestRes.data as DigestEntry[]) ?? []}
       sources={(article.sources_json as SourceRef[]) ?? []}
+      autoPublishMin={settingRes.data ? Number(settingRes.data.value) : 30}
     />
   );
 }

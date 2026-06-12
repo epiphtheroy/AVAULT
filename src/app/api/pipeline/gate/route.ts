@@ -50,7 +50,12 @@ export async function POST(req: Request) {
   // pass → IN_REVIEW; first fail → GATED (client offers one regeneration with the report injected);
   // second fail → IN_REVIEW flagged for manual edit (spec: two consecutive failures → manual).
 
-  await db.from("articles").update({ gate_report_json: report, status: newStatus }).eq("id", articleId);
+  await db.from("articles").update({
+    gate_report_json: report,
+    status: newStatus,
+    // Start the auto-publish review window only for gate-passed drafts.
+    review_requested_at: report.pass && newStatus === "IN_REVIEW" ? new Date().toISOString() : null,
+  }).eq("id", articleId);
   await logEvent("article", articleId, article.status, newStatus, actor === "wonwoo" ? actor : model, {
     pass: report.pass,
     failed: report.checks.filter((c) => !c.pass).map((c) => c.name),

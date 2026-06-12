@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Article, DigestEntry, GateReport, SourceRef, Story } from "@/lib/types";
+import { mdToHtml } from "@/lib/markdown";
 
 interface Version {
   id: string;
@@ -20,18 +21,19 @@ interface Props {
   versions: Version[];
   digest: DigestEntry[];
   sources: SourceRef[];
+  autoPublishMin: number;
 }
 
-type Pane = "gate" | "sources" | "versions" | "digest";
+type Pane = "한국어" | "gate" | "sources" | "versions" | "digest";
 
-export function EditorClient({ article, story, versions, digest, sources }: Props) {
+export function EditorClient({ article, story, versions, digest, sources, autoPublishMin }: Props) {
   const router = useRouter();
   const [headline, setHeadline] = useState(article.headline ?? "");
   const [deck, setDeck] = useState(article.deck ?? "");
   const [summaryLine, setSummaryLine] = useState(article.summary_line ?? "");
   const [body, setBody] = useState(article.body_md ?? "");
   const [notes, setNotes] = useState("");
-  const [pane, setPane] = useState<Pane>("gate");
+  const [pane, setPane] = useState<Pane>(article.ko_review_md ? "한국어" : "gate");
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -88,6 +90,11 @@ export function EditorClient({ article, story, versions, digest, sources }: Prop
   const isPublished = !!article.published_at;
   const canRegen = article.regen_count < 2 && !isPublished;
 
+  const autoPublishLeft =
+    !isPublished && article.status === "IN_REVIEW" && gate?.pass && article.review_requested_at && autoPublishMin > 0
+      ? Math.round((new Date(article.review_requested_at).getTime() + autoPublishMin * 60_000 - Date.now()) / 60_000)
+      : null;
+
   return (
     <div>
       {/* Status strip */}
@@ -98,6 +105,11 @@ export function EditorClient({ article, story, versions, digest, sources }: Prop
           {gate && (
             <span className={gate.pass ? "font-bold text-green-700" : "font-bold text-accent"}>
               gate: {gate.pass ? "PASS" : `FAIL (${failedChecks.length})`}
+            </span>
+          )}
+          {autoPublishLeft !== null && (
+            <span className={`px-2 py-0.5 font-bold ${autoPublishLeft <= 5 ? "bg-accent text-white" : "border border-rule text-ink-soft"}`}>
+              {autoPublishLeft <= 0 ? "자동 발행 대기" : `자동 발행까지 ~${autoPublishLeft}분`}
             </span>
           )}
         </div>
@@ -179,13 +191,28 @@ export function EditorClient({ article, story, versions, digest, sources }: Prop
         {/* Side panes */}
         <div>
           <div className="flex border-b-2 border-rule-dark text-[12px] font-bold">
-            {(["gate", "sources", "versions", "digest"] as Pane[]).map((p) => (
+            {(["한국어", "gate", "sources", "versions", "digest"] as Pane[]).map((p) => (
               <button key={p} onClick={() => setPane(p)}
                 className={`px-3 py-1.5 uppercase tracking-wider ${pane === p ? "bg-ink text-white" : "text-ink-soft hover:text-ink"}`}>
                 {p}
               </button>
             ))}
           </div>
+
+          {pane === "한국어" && (
+            <div className="mt-3">
+              {article.ko_review_md ? (
+                <div
+                  className="prose-avault max-h-[70vh] overflow-y-auto border border-rule bg-paper p-3 text-[13.5px]"
+                  dangerouslySetInnerHTML={{ __html: mdToHtml(article.ko_review_md) }}
+                />
+              ) : (
+                <p className="text-[13px] text-ink-faint">
+                  한국어 검토본이 아직 없습니다. 초안 생성 직후 자동으로 만들어지며, 누락 시 5분 주기로 재시도됩니다.
+                </p>
+              )}
+            </div>
+          )}
 
           {pane === "gate" && (
             <div className="mt-3 space-y-2">

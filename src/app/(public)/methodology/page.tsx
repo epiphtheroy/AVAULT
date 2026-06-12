@@ -68,8 +68,10 @@ export default function MethodologyPage() {
           Drafts pass an automated quality gate that checks, among other things: that research
           added at least one fact absent from the source; that the strongest objection was
           engaged; that no unverified factual assertion about any person appears; and that no
-          private individual&apos;s character is attacked. Then the author edits and approves.
-          Nothing publishes without that approval.
+          private individual&apos;s character is attacked. Every gate-passed draft then enters
+          the author&apos;s review queue, where he edits, approves, or kills it. Approval is
+          given explicitly, or by a standing editorial rule after a fixed review window passes
+          with no objection. Either way, the standards are his and the responsibility is his.
         </p>
 
         <h2>How AVAULT grows</h2>

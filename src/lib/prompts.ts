@@ -205,20 +205,40 @@ Return the finished column as JSON inside a \`\`\`json fence, with this shape:
 }
 
 export function selectionPrompt(candidates: { id: string; outlet: string; headline: string; summary: string | null; url: string; published_at: string | null }[], recentTopics: string[]): string {
-  return `You are the story-selection step for AVAULT, a daily publication of political-ethical judgment. Score each candidate story on:
-1. Density of genuine political-ethical conflict.
-2. Presence of a deep issue distinct from the surface reaction.
-3. Search-demand potential (normative long-tail queries people will search).
-4. Outreach potential (identifiable scholars/journalists to engage).
-5. Diversity against the last 7 days of published topics. Avoid three columns on the same beat; avoid repeating yesterday's domains.
+  return `You are the story-selection step for AVAULT, a daily publication of political-ethical judgment. Select exactly THE TOP 3 stories. Selected stories go directly into research and column writing, so choose as if choosing the day's three columns.
+
+The controlling criterion: prefer stories with SUSTAINED REFLECTIVE DEPTH. The test is whether the case could anchor a political-ethics case study worth writing about: it raises questions of institutions, rules, structures, obligations, or competing values that remain worth thinking about after the news cycle moves on. Deprioritize sudden one-off incidents, accidents, crimes, or spectacles UNLESS they expose a structural or institutional question that outlives the event itself.
+
+Score each candidate on:
+1. Reflective depth: could this sustain a rigorous case analysis (the case-study test above)? This criterion dominates.
+2. Density of genuine political-ethical conflict: real competing values or obligations, not mere outrage.
+3. Presence of a deep issue distinct from the surface reaction.
+4. Search-demand potential (normative long-tail queries people will search).
+5. Outreach potential (identifiable scholars/journalists to engage).
+6. Diversity against the last 7 days of published topics. Avoid three columns on the same beat; avoid repeating yesterday's domains.
 
 Last 7 days of published topics: ${recentTopics.length ? recentTopics.join("; ") : "none yet"}
 
 CANDIDATES
 ${candidates.map((c) => `id: ${c.id}\noutlet: ${c.outlet}\nheadline: ${c.headline}\nsummary: ${c.summary ?? ""}\nurl: ${c.url}`).join("\n---\n")}
 
-Return JSON in a \`\`\`json fence: an array of up to 8, ranked best first:
-[{"id": string, "score": number (0-10), "rationale": string (one paragraph)}]`;
+Return JSON in a \`\`\`json fence: an array of exactly 3, ranked best first:
+[{"id": string, "score": number (0-10), "rationale": string (one paragraph explaining, concretely, what there is to think about in this case)}]`;
+}
+
+/** EN→KO interleaved translation for editorial review (sentence-by-sentence pairing). */
+export function interleaveTranslationPrompt(markdown: string): string {
+  return `Translate the following English Markdown into Korean for editorial review, with STRICT sentence-by-sentence interleaving.
+
+Rules:
+- For every English sentence: output the English sentence on one line, then its Korean translation on the next line, then a blank line.
+- Headings: output as one line in the form "## English heading / 한국어 번역" (keep the original #-level).
+- List items: keep the list marker; put the English item, then the Korean translation on the following line prefixed with two spaces.
+- Preserve bold/italic markers where natural. Translate accurately and plainly; no commentary, no additions, no omissions.
+- Output raw Markdown only.
+
+TEXT:
+${markdown}`;
 }
 
 export function gatePrompt(article: { headline: string; deck: string; summary_line: string; body_md: string; sources: SourceRef[] }, sourceText: string | null): string {

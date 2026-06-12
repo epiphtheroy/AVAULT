@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     if (!s) return NextResponse.json({ error: "story not found" }, { status: 404 });
     story = s;
 
-    const slot = slotDate ?? new Date().toISOString().slice(0, 10);
+    const slot = slotDate ?? new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10); // KST day
     await db.from("stories").update({ status: "SELECTED", slot_date: slot }).eq("id", storyId);
     await logEvent("story", storyId, story.status, "SELECTED", actor);
 
@@ -98,6 +98,8 @@ export async function POST(req: Request) {
       topic_tags: draft.topic_tags ?? [],
       status: "DRAFTED",
       regen_count: articleId ? (article.regen_count ?? 0) + 1 : 0,
+      gate_report_json: null, // a new draft must be re-gated
+      ko_review_md: null,     // and re-translated
     };
 
     await db.from("articles").update(update).eq("id", article.id);
@@ -114,6 +116,17 @@ export async function POST(req: Request) {
       usage: result.usage,
       regen: !!articleId,
     });
+
+    // EN/KO review translation (cheap model); non-fatal, auto-actions retries on failure.
+    try {
+      const { translateForReview } = await import("@/lib/translate");
+      const ko = await translateForReview(
+        `# ${cleaned.headline}\n\n${cleaned.deck}\n\n**${cleaned.summary_line}**\n\n${cleaned.body_md}`
+      );
+      await db.from("articles").update({ ko_review_md: ko }).eq("id", article.id);
+    } catch {
+      // retried by auto-actions
+    }
 
     return NextResponse.json({ articleId: article.id, status: "DRAFTED", usage: result.usage });
   } catch (e) {
