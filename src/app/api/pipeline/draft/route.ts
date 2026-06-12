@@ -114,7 +114,7 @@ export async function POST(req: Request) {
         const { validateYouTube, searchYouTube } = await import("@/lib/seo");
         return (
           (await validateYouTube(draft.youtube?.url, draft.youtube?.title)) ??
-          (await searchYouTube(`${draft.seo_title || draft.headline} ${draft.topic_tags?.[0] ?? ""}`))
+          (await searchYouTube(`${(draft.topic_tags ?? []).slice(0, 3).join(" ")} ${draft.seo_title || draft.headline}`))
         );
       })(),
     };

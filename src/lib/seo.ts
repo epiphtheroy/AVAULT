@@ -72,11 +72,12 @@ export async function searchYouTube(query: string):
       part: "snippet",
       q: query.slice(0, 100),
       type: "video",
-      maxResults: "1",
+      maxResults: "3",
       order: "relevance",
       relevanceLanguage: "en",
       safeSearch: "moderate",
       videoEmbeddable: "true",
+      videoDuration: "medium", // 4-20 min: filters shorts and junk
       key,
     });
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
@@ -84,7 +85,10 @@ export async function searchYouTube(query: string):
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const item = data.items?.[0];
+    const item = (data.items ?? []).find(
+      (i: { id?: { videoId?: string }; snippet?: { title?: string } }) =>
+        i.id?.videoId && !/#shorts/i.test(i.snippet?.title ?? "")
+    );
     if (!item?.id?.videoId) return null;
     return {
       url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
