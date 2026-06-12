@@ -22,6 +22,7 @@ interface DraftPayload {
   seo_description?: string;
   faq?: { q: string; a: string }[];
   social?: { x: string; linkedin: string };
+  youtube?: { url: string; title: string } | null;
 }
 
 // Research & draft (spec 5.3). One Fable 5 call, web search enabled, digest injected (4.2 — required).
@@ -108,6 +109,8 @@ export async function POST(req: Request) {
       seo_description: (draft.seo_description ?? "").slice(0, 200) || null,
       faq_json: Array.isArray(draft.faq) ? draft.faq.slice(0, 3) : [],
       social_json: draft.social ?? null,
+      // oEmbed-verified only; hallucinated video IDs are dropped here.
+      youtube_json: await (await import("@/lib/seo")).validateYouTube(draft.youtube?.url, draft.youtube?.title),
     };
 
     await db.from("articles").update(update).eq("id", article.id);

@@ -19,7 +19,13 @@ export default function AboutPage() {
       name: "Wonwoo Yoon",
       url: `${siteUrl}/about`,
       jobTitle: "Critic and writer",
-      description: "Seoul-based critic and writer; author and sole human editor of AVAULT.",
+      description:
+        "Seoul-based critic and writer; author and sole human editor of AVAULT. MBA; Ph.D. for research on social networks; former adjunct professor of business administration at Kyung Hee University; author of six management books in Korean rooted in long study of Peter Drucker.",
+      hasCredential: [
+        { "@type": "EducationalOccupationalCredential", credentialCategory: "degree", name: "MBA" },
+        { "@type": "EducationalOccupationalCredential", credentialCategory: "degree", name: "Ph.D. (social network research)" },
+      ],
+      affiliation: { "@type": "CollegeOrUniversity", name: "Kyung Hee University" },
       worksFor: { "@type": "Organization", name: "AVAULT", url: siteUrl },
     },
   };
@@ -37,6 +43,12 @@ export default function AboutPage() {
           <strong>Wonwoo Yoon</strong> is a critic and writer based in Seoul. AVAULT is his
           studio and his byline: every column published here is his judgment, argued in his
           voice, and he is accountable for every word of it.
+        </p>
+        <p>
+          He holds an MBA and a Ph.D. earned for research on social networks. For the past two
+          years he taught as an adjunct professor in the Department of Business Administration
+          at Kyung Hee University in Seoul. Out of a long engagement with the work of Peter
+          Drucker, he has written six books on management published in Korean.
         </p>
         <p>
           This is one person learning the world in public. Each day, three of the world&apos;s

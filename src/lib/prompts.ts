@@ -210,7 +210,8 @@ Return the finished column as JSON inside a \`\`\`json fence, with this shape:
   "seo_title": string,         // search-facing title, max 60 chars: phrase it as the normative long-tail query people actually search ("Is X ethical", "Should Y be allowed", "[event] ethics explained"); key terms early; distinct from the literary headline
   "seo_description": string,   // 140-160 chars; states the verdict directly; includes the main search phrase naturally
   "faq": [{"q": string, "a": string}],  // 2-3 normative questions this column answers, phrased as real search queries; each answer is a self-contained 40-60 word direct answer consistent with the verdict
-  "social": {"x": string, "linkedin": string}  // x: <=270 chars, the sharpest tension + verdict, no hashtag spam (max 2); linkedin: 2-3 short paragraphs, professional register, ends with the column's core question
+  "social": {"x": string, "linkedin": string},  // x: <=270 chars, the sharpest tension + verdict, no hashtag spam (max 2); linkedin: 2-3 short paragraphs, professional register, ends with the column's core question
+  "youtube": {"url": string, "title": string} | null  // ONE genuinely relevant YouTube video (lecture, talk, explainer, primary footage) discovered during your web research. STRICT: only a youtube.com/watch or youtu.be URL that literally appeared in your search results; never construct or guess a video ID; null if nothing truly relevant surfaced
 }`;
 }
 

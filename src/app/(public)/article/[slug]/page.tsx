@@ -98,7 +98,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       <header>
         <p className="kicker">
-          {article.is_reopening ? "The Reopening" : article.topic_tags?.[0] ?? "Verdict"}
+          {article.is_reopening ? "The Reopening" : article.topic_tags?.[0] ?? "Vault"}
         </p>
         <h1 className="hed mt-2 text-[28px] sm:text-4xl">{article.headline}</h1>
         {article.deck && (
@@ -127,6 +127,39 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         className="prose-avault mt-5"
         dangerouslySetInnerHTML={{ __html: mdToHtml(stripSourcesSection(article.body_md)) }}
       />
+
+      {article.youtube_json?.url && (
+        <section className="mt-8 border-t border-rule pt-4">
+          <h2 className="font-sans text-xs font-bold tracking-[0.14em] uppercase">Watch</h2>
+          <a
+            href={article.youtube_json.url}
+            target="_blank"
+            rel="noopener nofollow"
+            className="group mt-3 flex items-center gap-4 border border-rule p-3 hover:border-ink"
+          >
+            {article.youtube_json.thumbnail ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={article.youtube_json.thumbnail}
+                alt=""
+                className="h-16 w-28 shrink-0 object-cover"
+              />
+            ) : null}
+            <span>
+              <span className="block font-serif text-[15px] font-bold leading-snug group-hover:text-accent">
+                {article.youtube_json.title}
+              </span>
+              <span className="mt-1 flex items-center gap-1.5 text-[12px] text-ink-faint">
+                <svg viewBox="0 0 28 20" className="h-3.5 w-5" aria-hidden="true">
+                  <rect width="28" height="20" rx="4.5" fill="#FF0000" />
+                  <path d="M11.5 5.5 L19 10 L11.5 14.5 Z" fill="#ffffff" />
+                </svg>
+                Watch on YouTube
+              </span>
+            </span>
+          </a>
+        </section>
+      )}
 
       {faq.length > 0 && (
         <section className="mt-8 border-t border-rule pt-4">

@@ -62,6 +62,7 @@ export interface Article {
   seo_description: string | null;
   faq_json: { q: string; a: string }[];
   social_json: { x: string; linkedin: string } | null;
+  youtube_json: { url: string; title: string; thumbnail?: string } | null;
   created_at: string;
   updated_at: string;
 }

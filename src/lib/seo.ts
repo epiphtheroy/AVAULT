@@ -36,6 +36,31 @@ export function fireInternal(path: string, body: Record<string, unknown>): void 
   }).catch(() => undefined);
 }
 
+/** Validate a model-proposed YouTube URL via oEmbed (no API key; 200 = real video).
+ *  Returns canonical data or null — hallucinated IDs never reach the page. */
+export async function validateYouTube(url: string | null | undefined, fallbackTitle?: string):
+  Promise<{ url: string; title: string; thumbnail?: string } | null> {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (!m) return null;
+  const canonical = `https://www.youtube.com/watch?v=${m[1]}`;
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(canonical)}&format=json`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      url: canonical,
+      title: (data.title as string) || fallbackTitle || "Related video",
+      thumbnail: data.thumbnail_url as string | undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Everything that should happen the moment an article goes live. */
 export function afterPublish(slug: string, articleId: string): void {
   const url = `${siteUrl()}/article/${slug}`;

@@ -74,18 +74,6 @@ export default function MethodologyPage() {
           with no objection. Either way, the standards are his and the responsibility is his.
         </p>
 
-        <h2>How AVAULT grows</h2>
-        <p>
-          Two channels: search, and short personal notes to the journalists and scholars whose
-          work each column engages. Every such email is individually reviewed and approved by
-          the author before sending, uses only publicly available professional contact
-          information, never exceeds one note per person per column, and honors a single
-          &quot;no more emails&quot; permanently. There are no automated follow-ups.
-        </p>
-        <p>
-          The standing rule beneath all of it: every growth mechanism must itself survive the
-          ethical scrutiny this publication applies to the world.
-        </p>
       </div>
       <div className="h-10" />
     </div>

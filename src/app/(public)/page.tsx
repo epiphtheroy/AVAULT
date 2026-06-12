@@ -15,7 +15,7 @@ export default async function HomePage() {
       <section className="pt-6">
         <div className="flex items-baseline justify-between border-b-2 border-rule-dark pb-2">
           <h1 className="font-sans text-sm font-bold tracking-[0.14em] uppercase">
-            Today&apos;s verdicts
+            Today&apos;s vault
           </h1>
           <p className="text-xs text-ink-faint">
             {today[0]?.published_at ? dateLabel(today[0].published_at) : "The vault opens at 6:00 a.m. ET"}
@@ -37,7 +37,7 @@ export default async function HomePage() {
         ) : (
           <div>
             {today.map((a, i) => (
-              <ArticleCard key={a.id} article={a} kicker={`Verdict ${i + 1}`} />
+              <ArticleCard key={a.id} article={a} kicker={`Vault ${i + 1}`} />
             ))}
           </div>
         )}
