@@ -20,7 +20,17 @@ export function mdToHtml(md: string): string {
 
   const flushPara = () => {
     if (para.length) {
-      out.push(`<p>${inline(esc(para.join(" ")))}</p>`);
+      const text = para.join(" ");
+      // Smart Brevity signpost promotion: a block opening with a bolded 1-5 word
+      // lead that ends in ":" or "—" becomes a semantic <h2> (extraction signal)
+      // followed by the rest of the block as the paragraph.
+      const sp = text.match(/^\*\*([^*]{2,60}?[:—])\*\*\s*(.*)$/);
+      if (sp && sp[1].trim().split(/\s+/).length <= 5) {
+        out.push(`<h2 class="sp">${inline(esc(sp[1].replace(/[:—]\s*$/, "")))}</h2>`);
+        if (sp[2].trim()) out.push(`<p>${inline(esc(sp[2]))}</p>`);
+      } else {
+        out.push(`<p>${inline(esc(text))}</p>`);
+      }
       para = [];
     }
   };

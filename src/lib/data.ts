@@ -86,6 +86,38 @@ export async function getRelatedArticles(article: Article, limit = 4): Promise<A
   return (data as Article[]) ?? [];
 }
 
+export async function getAllTags(): Promise<{ tag: string; count: number }[]> {
+  const db = supabaseAnon();
+  if (!db) return [];
+  const { data } = await db
+    .from("articles")
+    .select("topic_tags")
+    .in("status", PUBLISHED)
+    .limit(2000);
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    for (const t of (row.topic_tags as string[]) ?? []) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export async function getRecentForNews(hours = 48): Promise<Article[]> {
+  const db = supabaseAnon();
+  if (!db) return [];
+  const { data } = await db
+    .from("articles")
+    .select("*")
+    .in("status", PUBLISHED)
+    .gte("published_at", new Date(Date.now() - hours * 3600_000).toISOString())
+    .order("published_at", { ascending: false })
+    .limit(100);
+  return (data as Article[]) ?? [];
+}
+
 export async function getAllPublishedSlugs(): Promise<{ url_slug: string; published_at: string }[]> {
   const db = supabaseAnon();
   if (!db) return [];

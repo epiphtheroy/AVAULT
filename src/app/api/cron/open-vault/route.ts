@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { logEvent, firstLine, lastLine } from "@/lib/pipeline";
+import { afterPublish } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export async function GET(req: Request) {
       await db.from("stories").update({ status: "PUBLISHED" }).eq("id", article.story_id);
     }
     await logEvent("article", article.id, "APPROVED", "PUBLISHED", "system", { opening: true });
+    if (article.url_slug) afterPublish(article.url_slug, article.id);
     opened++;
   }
 

@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     if (action === "edit" && fields) {
-      const allowed = ["headline", "deck", "summary_line", "body_md", "topic_tags", "intervention_type", "slot_date"] as const;
+      const allowed = ["headline", "deck", "summary_line", "body_md", "topic_tags", "intervention_type", "slot_date", "seo_title", "seo_description"] as const;
       const update: Record<string, unknown> = {};
       for (const k of allowed) if (k in fields) update[k] = fields[k];
       // An edit restarts the 30-minute auto-publish window.

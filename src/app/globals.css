@@ -47,6 +47,24 @@ body {
   padding-top: 0.9em;
   border-top: 1px solid var(--color-rule);
 }
+/* Smart Brevity signpost: semantic h2 styled as a tight bold lead line */
+.prose-avault h2.sp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 1.5em 0 0.3em;
+  padding-top: 0;
+  border-top: none;
+}
+.prose-avault h2.sp::after {
+  content: ":";
+}
+.prose-avault h2.sp + p {
+  margin-top: 0;
+}
+
 .prose-avault h3 {
   font-family: var(--font-sans);
   font-weight: 600;

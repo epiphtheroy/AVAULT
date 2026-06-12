@@ -24,7 +24,7 @@ interface Props {
   autoPublishMin: number;
 }
 
-type Pane = "한국어" | "gate" | "sources" | "versions" | "digest";
+type Pane = "한국어" | "gate" | "seo" | "sources" | "versions" | "digest";
 
 export function EditorClient({ article, story, versions, digest, sources, autoPublishMin }: Props) {
   const router = useRouter();
@@ -32,6 +32,8 @@ export function EditorClient({ article, story, versions, digest, sources, autoPu
   const [deck, setDeck] = useState(article.deck ?? "");
   const [summaryLine, setSummaryLine] = useState(article.summary_line ?? "");
   const [body, setBody] = useState(article.body_md ?? "");
+  const [seoTitle, setSeoTitle] = useState(article.seo_title ?? "");
+  const [seoDescription, setSeoDescription] = useState(article.seo_description ?? "");
   const [notes, setNotes] = useState("");
   const [pane, setPane] = useState<Pane>(article.ko_review_md ? "한국어" : "gate");
   const [busy, setBusy] = useState<string | null>(null);
@@ -40,7 +42,8 @@ export function EditorClient({ article, story, versions, digest, sources, autoPu
   const gate = article.gate_report_json as GateReport | null;
   const dirty =
     headline !== (article.headline ?? "") || deck !== (article.deck ?? "") ||
-    summaryLine !== (article.summary_line ?? "") || body !== (article.body_md ?? "");
+    summaryLine !== (article.summary_line ?? "") || body !== (article.body_md ?? "") ||
+    seoTitle !== (article.seo_title ?? "") || seoDescription !== (article.seo_description ?? "");
 
   async function call(endpoint: string, payload: Record<string, unknown>, label: string) {
     setBusy(label);
@@ -66,7 +69,7 @@ export function EditorClient({ article, story, versions, digest, sources, autoPu
   const saveEdits = () =>
     call("/api/pipeline/status", {
       entity: "article", id: article.id, action: "edit",
-      fields: { headline, deck, summary_line: summaryLine, body_md: body },
+      fields: { headline, deck, summary_line: summaryLine, body_md: body, seo_title: seoTitle, seo_description: seoDescription },
     }, "save");
 
   const runGate = async () => {
@@ -191,13 +194,60 @@ export function EditorClient({ article, story, versions, digest, sources, autoPu
         {/* Side panes */}
         <div>
           <div className="flex border-b-2 border-rule-dark text-[12px] font-bold">
-            {(["한국어", "gate", "sources", "versions", "digest"] as Pane[]).map((p) => (
+            {(["한국어", "gate", "seo", "sources", "versions", "digest"] as Pane[]).map((p) => (
               <button key={p} onClick={() => setPane(p)}
                 className={`px-3 py-1.5 uppercase tracking-wider ${pane === p ? "bg-ink text-white" : "text-ink-soft hover:text-ink"}`}>
                 {p}
               </button>
             ))}
           </div>
+
+          {pane === "seo" && (
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-ink-soft">
+                  SEO title ({seoTitle.length}/60) — 검색용 롱테일 질문형
+                </label>
+                <input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)}
+                  placeholder="Is X ethical? ..."
+                  className="mt-1 w-full border border-rule bg-paper px-3 py-2 text-[13px] outline-none focus:border-ink" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-ink-soft">
+                  SEO description ({seoDescription.length}/160)
+                </label>
+                <textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} rows={3}
+                  className="mt-1 w-full border border-rule bg-paper px-3 py-2 text-[13px] outline-none focus:border-ink" />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-ink-soft">FAQ (검색 질문 블록)</p>
+                {(article.faq_json ?? []).length === 0 && <p className="mt-1 text-[12px] text-ink-faint">없음 (재생성 시 자동 생성)</p>}
+                {(article.faq_json ?? []).map((f, i) => (
+                  <div key={i} className="mt-2 border border-rule p-2.5 text-[12px]">
+                    <p className="font-bold">{f.q}</p>
+                    <p className="mt-1 text-ink-soft">{f.a}</p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-ink-soft">소셜 초안 (수동 게시용)</p>
+                {article.social_json ? (
+                  <>
+                    <div className="mt-2 border border-rule p-2.5">
+                      <p className="text-[11px] font-bold text-ink-faint">X</p>
+                      <pre className="mt-1 whitespace-pre-wrap font-serif text-[12.5px]">{article.social_json.x}</pre>
+                    </div>
+                    <div className="mt-2 border border-rule p-2.5">
+                      <p className="text-[11px] font-bold text-ink-faint">LinkedIn</p>
+                      <pre className="mt-1 whitespace-pre-wrap font-serif text-[12.5px]">{article.social_json.linkedin}</pre>
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-1 text-[12px] text-ink-faint">없음 (재생성 시 자동 생성)</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {pane === "한국어" && (
             <div className="mt-3">

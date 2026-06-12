@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
-import { getAllPublishedSlugs } from "@/lib/data";
+import { getAllPublishedSlugs, getAllTags } from "@/lib/data";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://avault.news";
 
 export const revalidate = 1800;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getAllPublishedSlugs();
+  const [slugs, tags] = await Promise.all([getAllPublishedSlugs(), getAllTags()]);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: siteUrl, changeFrequency: "daily", priority: 1 },
@@ -24,5 +24,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...staticPages, ...articles];
+  const topics: MetadataRoute.Sitemap = tags.slice(0, 100).map((t) => ({
+    url: `${siteUrl}/topic/${encodeURIComponent(t.tag)}`,
+    changeFrequency: "daily",
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...articles, ...topics];
 }

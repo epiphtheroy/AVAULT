@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { logEvent, slugify, readingTime, firstLine, lastLine } from "@/lib/pipeline";
 import { translateForReview } from "@/lib/translate";
+import { afterPublish } from "@/lib/seo";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -83,6 +84,7 @@ export async function GET(req: Request) {
       await logEvent("article", article.id, "IN_REVIEW", "PUBLISHED", "system:auto-approve", {
         rule: `no editor action within ${publishMin}m of review request`,
       });
+      afterPublish(slug, article.id);
       published++;
     }
     if (published > 0) {

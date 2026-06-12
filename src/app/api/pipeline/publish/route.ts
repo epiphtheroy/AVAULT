@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { logEvent, slugify, readingTime, firstLine, lastLine } from "@/lib/pipeline";
+import { afterPublish } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,10 @@ export async function POST(req: Request) {
   revalidatePath("/vault");
   revalidatePath(`/article/${slug}`);
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   revalidatePath("/rss.xml");
+
+  afterPublish(slug, articleId); // IndexNow ping + internal-link backfill
 
   return NextResponse.json({ articleId, status: "PUBLISHED", slug, url: `/article/${slug}` });
 }

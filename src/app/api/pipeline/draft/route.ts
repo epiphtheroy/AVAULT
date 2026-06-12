@@ -18,6 +18,10 @@ interface DraftPayload {
   intervention_type: string;
   topic_tags: string[];
   sources: SourceRef[];
+  seo_title?: string;
+  seo_description?: string;
+  faq?: { q: string; a: string }[];
+  social?: { x: string; linkedin: string };
 }
 
 // Research & draft (spec 5.3). One Fable 5 call, web search enabled, digest injected (4.2 — required).
@@ -100,6 +104,10 @@ export async function POST(req: Request) {
       regen_count: articleId ? (article.regen_count ?? 0) + 1 : 0,
       gate_report_json: null, // a new draft must be re-gated
       ko_review_md: null,     // and re-translated
+      seo_title: (draft.seo_title ?? "").slice(0, 70) || null,
+      seo_description: (draft.seo_description ?? "").slice(0, 200) || null,
+      faq_json: Array.isArray(draft.faq) ? draft.faq.slice(0, 3) : [],
+      social_json: draft.social ?? null,
     };
 
     await db.from("articles").update(update).eq("id", article.id);

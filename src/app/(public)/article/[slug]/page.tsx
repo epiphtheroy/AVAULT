@@ -20,9 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
   if (!article) return { title: "Not found" };
+  // Search surfaces get the normative long-tail title; social/OG keep the literary headline.
   return {
-    title: article.headline ?? undefined,
-    description: article.deck ?? article.summary_line ?? undefined,
+    title: article.seo_title ?? article.headline ?? undefined,
+    description: article.seo_description ?? article.deck ?? article.summary_line ?? undefined,
     alternates: { canonical: `${siteUrl}/article/${slug}` },
     openGraph: {
       title: article.headline ?? undefined,
@@ -50,10 +51,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.headline,
-    description: article.deck,
+    alternativeHeadline: article.seo_title ?? undefined,
+    description: article.seo_description ?? article.deck,
+    abstract: article.summary_line ?? undefined,
     datePublished: article.published_at,
     dateModified: article.updated_at,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    articleSection: article.topic_tags?.[0] ?? undefined,
     author: {
       "@type": "Person",
       name: "Wonwoo Yoon",
@@ -69,11 +73,28 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     },
     isAccessibleForFree: true,
     keywords: (article.topic_tags ?? []).join(", "),
+    speakable: { "@type": "SpeakableSpecification", cssSelector: [".summary-line"] },
   };
+
+  const faq = (article.faq_json ?? []) as { q: string; a: string }[];
+  const faqLd = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
 
   return (
     <article className="mx-auto max-w-3xl px-4 pt-7">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      )}
 
       <header>
         <p className="kicker">
@@ -97,7 +118,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       </header>
 
       {article.summary_line && (
-        <p className="mt-5 font-serif text-[17px] font-bold leading-relaxed">
+        <p className="summary-line mt-5 font-serif text-[17px] font-bold leading-relaxed">
           {article.summary_line}
         </p>
       )}
@@ -106,6 +127,31 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         className="prose-avault mt-5"
         dangerouslySetInnerHTML={{ __html: mdToHtml(stripSourcesSection(article.body_md)) }}
       />
+
+      {faq.length > 0 && (
+        <section className="mt-8 border-t border-rule pt-4">
+          <h2 className="font-sans text-xs font-bold tracking-[0.14em] uppercase">Questions this verdict answers</h2>
+          <div className="mt-2 space-y-3">
+            {faq.map((f, i) => (
+              <div key={i}>
+                <p className="font-serif text-[15px] font-bold">{f.q}</p>
+                <p className="mt-1 font-serif text-[15px] leading-relaxed text-ink-soft">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {(article.topic_tags ?? []).length > 0 && (
+        <p className="mt-6 flex flex-wrap gap-2 text-[12px]">
+          {article.topic_tags.map((t) => (
+            <Link key={t} href={`/topic/${encodeURIComponent(t)}`}
+              className="border border-rule px-2 py-0.5 text-ink-soft hover:border-ink hover:text-ink">
+              {t}
+            </Link>
+          ))}
+        </p>
+      )}
 
       {sources.length > 0 && (
         <section className="mt-8 border-t border-rule pt-4">

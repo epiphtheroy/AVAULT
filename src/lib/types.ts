@@ -58,6 +58,10 @@ export interface Article {
   flagged_for_reopening: boolean;
   ko_review_md: string | null;
   review_requested_at: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  faq_json: { q: string; a: string }[];
+  social_json: { x: string; linkedin: string } | null;
   created_at: string;
   updated_at: string;
 }
