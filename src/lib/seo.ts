@@ -61,6 +61,41 @@ export async function validateYouTube(url: string | null | undefined, fallbackTi
   }
 }
 
+/** Official YouTube Data API search: deterministic fallback when the model's research
+ *  surfaced no usable video. Returns the most relevant embeddable result or null. */
+export async function searchYouTube(query: string):
+  Promise<{ url: string; title: string; thumbnail?: string } | null> {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (!key || !query.trim()) return null;
+  try {
+    const params = new URLSearchParams({
+      part: "snippet",
+      q: query.slice(0, 100),
+      type: "video",
+      maxResults: "1",
+      order: "relevance",
+      relevanceLanguage: "en",
+      safeSearch: "moderate",
+      videoEmbeddable: "true",
+      key,
+    });
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const item = data.items?.[0];
+    if (!item?.id?.videoId) return null;
+    return {
+      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+      title: item.snippet?.title ?? "Related video",
+      thumbnail: item.snippet?.thumbnails?.medium?.url,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Everything that should happen the moment an article goes live. */
 export function afterPublish(slug: string, articleId: string): void {
   const url = `${siteUrl()}/article/${slug}`;

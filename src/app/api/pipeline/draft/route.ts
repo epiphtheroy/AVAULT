@@ -109,8 +109,14 @@ export async function POST(req: Request) {
       seo_description: (draft.seo_description ?? "").slice(0, 200) || null,
       faq_json: Array.isArray(draft.faq) ? draft.faq.slice(0, 3) : [],
       social_json: draft.social ?? null,
-      // oEmbed-verified only; hallucinated video IDs are dropped here.
-      youtube_json: await (await import("@/lib/seo")).validateYouTube(draft.youtube?.url, draft.youtube?.title),
+      // Model's research pick (oEmbed-verified) first; official Data API search as fallback.
+      youtube_json: await (async () => {
+        const { validateYouTube, searchYouTube } = await import("@/lib/seo");
+        return (
+          (await validateYouTube(draft.youtube?.url, draft.youtube?.title)) ??
+          (await searchYouTube(`${draft.seo_title || draft.headline} ${draft.topic_tags?.[0] ?? ""}`))
+        );
+      })(),
     };
 
     await db.from("articles").update(update).eq("id", article.id);
