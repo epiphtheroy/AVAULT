@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
-import { callClaude, extractJson, columnModel } from "@/lib/anthropic";
+import { callClaude, extractJson, utilityModel } from "@/lib/anthropic";
 import { outreachIdentifyPrompt } from "@/lib/prompts";
 import { logEvent } from "@/lib/pipeline";
 import type { SourceRef } from "@/lib/types";
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       { headline: article.headline, body_md: article.body_md, sources: (article.sources_json as SourceRef[]) ?? [] },
       byline
     ),
-    model: columnModel(),
+    model: utilityModel(), // Sonnet: web research for real public contacts (no Fable)
     maxTokens: 6000,
     webSearch: true,
   });

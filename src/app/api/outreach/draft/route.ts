@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
-import { callClaude, extractJson, columnModel } from "@/lib/anthropic";
+import { callClaude, extractJson, outreachModel } from "@/lib/anthropic";
 import { outreachDraftPrompt } from "@/lib/prompts";
 import { logEvent } from "@/lib/pipeline";
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         summary_line: article.summary_line,
         url,
       }),
-      model: columnModel(),
+      model: outreachModel(), // Haiku: simple personalized note (no Fable)
       maxTokens: 1500,
     });
     const draft = extractJson<{ subject: string; body: string }>(result.text);

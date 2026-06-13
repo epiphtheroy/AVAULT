@@ -22,19 +22,26 @@ interface CallOpts {
   effort?: "low" | "medium" | "high";
 }
 
+// Model policy (editor decision 2026-06-12): ONLY column writing uses Fable.
+// Every other step runs on a cheaper model.
 export function columnModel(): string {
   return process.env.ANTHROPIC_MODEL || "claude-fable-5";
 }
+/** Quality gate: checklist verification — Sonnet is accurate enough, far cheaper than Fable. */
 export function utilityModel(): string {
-  return process.env.ANTHROPIC_UTILITY_MODEL || columnModel();
+  return process.env.ANTHROPIC_UTILITY_MODEL || "claude-sonnet-4-6";
 }
-/** Story selection: judgment over ~60 candidates; Opus + thinking (editor decision 2026-06-12). */
+/** Story selection: judgment over ~60 candidates; Opus + thinking. */
 export function selectionModel(): string {
   return process.env.ANTHROPIC_SELECTION_MODEL || "claude-opus-4-8";
 }
-/** EN→KO review translations: cheapest capable model. */
+/** EN→KO review translations + internal-link backfill: cheapest capable model. */
 export function translationModel(): string {
   return process.env.ANTHROPIC_TRANSLATION_MODEL || "claude-haiku-4-5-20251001";
+}
+/** Outreach email drafting: simple 150-word personalization — Haiku. */
+export function outreachModel(): string {
+  return process.env.ANTHROPIC_OUTREACH_MODEL || "claude-haiku-4-5-20251001";
 }
 
 export async function callClaude(opts: CallOpts): Promise<AnthropicResult> {
