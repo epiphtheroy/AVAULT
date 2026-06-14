@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: "gmail not configured",
-        need: ["OUTREACH_FROM", "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN"],
+        need: ["OUTREACH_FROM", "GMAIL_USER", "GMAIL_APP_PASSWORD"],
       },
       { status: 503 }
     );
