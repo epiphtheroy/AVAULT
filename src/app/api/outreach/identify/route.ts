@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 // Phase 2 — outreach target identification (spec 5.6). Up to 10 people, public contact info only,
 // suppression list enforced automatically (opted out / bounced / contacted in last 90 days).
 export async function POST(req: Request) {
-  const { ok, actor } = await requireAdmin();
-  if (!ok || actor !== "wonwoo") return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const { ok, actor } = await requireAdmin(req);
+  if (!ok) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { articleId } = await req.json();
   const db = supabaseAdmin();
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   await db.from("articles").update({ status: "OUTREACH_PENDING" }).eq("id", articleId);
-  await logEvent("article", articleId, "PUBLISHED", "OUTREACH_PENDING", "wonwoo", { contacts: rows.length });
+  await logEvent("article", articleId, "PUBLISHED", "OUTREACH_PENDING", actor, { contacts: rows.length });
 
   return NextResponse.json({ contacts: rows.length, suppressed: rows.filter((r) => r.suppressed).length });
 }

@@ -117,6 +117,15 @@ export async function GET(req: Request) {
     } catch { /* next run */ }
   }
 
+  // ── 2c. Auto-outreach send (cheap; the send route enforces cap + per-run throttle).
+  // Master switch app_settings.outreach_send_enabled (0 = off, default). Editor enabled
+  // full-auto send 2026-06-14, overriding the spec's "no auto-send" rule.
+  const outreachOn = (await setting(db, "outreach_send_enabled", 0)) === 1;
+  if (outreachOn) {
+    await fireAndForget("/api/outreach/send", { max: 3 });
+    summary.outreachSend = "fired";
+  }
+
   // ── 3. ONE heavy op per run, in priority order.
 
   // 3a. Recover drafts stuck in RESEARCHING (>15 min, e.g. a killed invocation).
@@ -193,6 +202,47 @@ export async function GET(req: Request) {
         });
         await fireAndForget("/api/pipeline/draft", { storyId: ripe[0].id, slotDate: today });
         summary.heavyOp = `auto-accept-draft:${ripe[0].id}`;
+        return NextResponse.json(summary);
+      }
+    }
+  }
+
+  // 3f. Auto-outreach: identify contacts for a recently published column that has none.
+  if (outreachOn) {
+    const { data: pub } = await db
+      .from("articles").select("id")
+      .eq("status", "PUBLISHED")
+      .gte("published_at", new Date(Date.now() - 7 * 86400_000).toISOString())
+      .order("published_at", { ascending: false }).limit(5);
+    for (const a of pub ?? []) {
+      const { count } = await db
+        .from("contacts").select("id", { count: "exact", head: true }).eq("article_id", a.id);
+      if ((count ?? 0) === 0) {
+        await fireAndForget("/api/outreach/identify", { articleId: a.id });
+        summary.heavyOp = `outreach-identify:${a.id}`;
+        return NextResponse.json(summary);
+      }
+    }
+
+    // 3g. Draft emails for eligible contacts that do not have one yet.
+    const { data: pend } = await db
+      .from("articles").select("id")
+      .in("status", ["OUTREACH_PENDING", "OUTREACH_DRAFTED"])
+      .order("published_at", { ascending: false }).limit(5);
+    for (const a of pend ?? []) {
+      const { data: cs } = await db
+        .from("contacts").select("id, email, email_confidence, guess_opt_in")
+        .eq("article_id", a.id).eq("suppressed", false);
+      const eligible = (cs ?? []).filter(
+        (c) => c.email && (c.email_confidence === "FOUND" || (c.email_confidence === "GUESSED" && c.guess_opt_in))
+      );
+      if (!eligible.length) continue;
+      const ids = eligible.map((c) => c.id);
+      const { data: have } = await db.from("outreach_emails").select("contact_id").in("contact_id", ids);
+      const haveSet = new Set((have ?? []).map((h) => h.contact_id));
+      if (eligible.some((c) => !haveSet.has(c.id))) {
+        await fireAndForget("/api/outreach/draft", { articleId: a.id });
+        summary.heavyOp = `outreach-draft:${a.id}`;
         return NextResponse.json(summary);
       }
     }

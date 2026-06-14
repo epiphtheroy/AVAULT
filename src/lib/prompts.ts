@@ -301,12 +301,29 @@ Return JSON in a \`\`\`json fence:
 }
 
 export function outreachDraftPrompt(contact: { name: string; role: string | null; why_relevant: string }, article: { headline: string; summary_line: string; url: string }): string {
-  return `Draft one outreach email from Wonwoo Yoon, the author of AVAULT. Constraints, not template:
-- Plain text, under 150 words.
-- Must name the recipient's specific work/reporting and state specifically what the column argued in relation to it.
-- One link only: ${article.url}. No attachments. No flattery padding. No requests for shares or links. The email offers; it does not ask.
-- Honest sender identity (Wonwoo Yoon, AVAULT). End with one line noting that a single reply of "no more emails" is permanently honored.
-- No em-dashes. Write fresh; do not reuse stock phrasing.
+  return `Draft one short, warm outreach email in ENGLISH from Wonwoo Yoon, author of AVAULT. This is a light thank-you note, NOT a pitch. Constraints, not a template:
+
+TONE AND LENGTH
+- Light, personal, easy to read. Under 110 words. Three to four short sentences. No heaviness, no formality, no flattery padding.
+- Plain text only. No em-dashes. Write fresh; never reuse stock phrasing.
+
+WHAT TO SAY, in this order
+1. Open by naming the recipient's specific work and thanking them: their work genuinely shaped a piece you just published.
+2. Say that you cite or build on their specific point, and name that point concretely.
+3. Put the one link on its own line: ${article.url}
+4. One very short plain sentence explaining what AVAULT is, kept modest: a daily one-author publication of political-ethical verdicts on the day's news (avault.news). Do not oversell it.
+5. Close lightly: you mainly wanted to say thanks, and there is no need to reply.
+
+HARD RULES
+- Exactly one link, the one above. No attachments. No request for shares, links, replies, or coverage. The email offers; it never asks.
+- Honest identity. Sign as "Wonwoo Yoon, AVAULT".
+- Final line is a single quiet opt-out: note that one reply of "no more emails" is honored permanently.
+
+SUBJECT LINE (critical, must not look like spam)
+- Lead with the RECIPIENT'S own work or topic, not yours, so it reads as relevant and personal, like a peer wrote it.
+- Specific and concrete. Natural, lowercase phrasing. Under 60 characters.
+- Never use spam triggers: no exclamation marks, no ALL CAPS, no words like "free", "offer", "exclusive". Not salesy.
+- Shape only, do NOT copy these: "your work on X led somewhere", "built on your X reporting today", "citing your piece on X".
 
 RECIPIENT
 Name: ${contact.name}

@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 
 // Phase 2 — email drafting (spec 5.7). One email per eligible contact; constraints, not template.
 export async function POST(req: Request) {
-  const { ok, actor } = await requireAdmin();
-  if (!ok || actor !== "wonwoo") return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const { ok, actor } = await requireAdmin(req);
+  if (!ok) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { articleId } = await req.json();
   const db = supabaseAdmin();
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 
   if (drafted > 0) {
     await db.from("articles").update({ status: "OUTREACH_DRAFTED" }).eq("id", articleId);
-    await logEvent("article", articleId, article.status, "OUTREACH_DRAFTED", "wonwoo", { drafted });
+    await logEvent("article", articleId, article.status, "OUTREACH_DRAFTED", actor, { drafted });
   }
 
   return NextResponse.json({ eligible: eligible.length, drafted });
